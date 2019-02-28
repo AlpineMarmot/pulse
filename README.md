@@ -3,8 +3,8 @@
 Pulse is a crawler build on top of [gocolly/colly](https://github.com/gocolly/colly)
 
 Features:
-    - Yml configuration
-    - Mongo Db    
+ - Yml configuration
+ - MongoDB support 
     
 ### Installation
 
