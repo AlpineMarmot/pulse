@@ -1,3 +1,5 @@
-/.idea
-/tmp
+.idea
+*.bat
+*.sh
 *.exe
+tmp
