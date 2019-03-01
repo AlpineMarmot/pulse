@@ -1,13 +1,10 @@
-package main
+package config
 
 import (
-	"fmt"
-	"github.com/gocolly/colly"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"runtime"
-	"strconv"
+	"pulse/util"
 	"time"
 )
 
@@ -25,10 +22,12 @@ type Config struct {
 		DisallowedDomains []string `yaml:"disallowed-domains"`
 		IgnoreRobotsTxt   bool     `yaml:"ignore-robots-txt"`
 		Limit             struct {
-			Parallelism string `yaml:"parallelism"`
+			Parallelism interface{} `yaml:"parallelism"`
 		}
+		MaxDepth            int           `yaml:"max-depth"`
 		MaxUrlVisited       int64         `yaml:"max-url-visited"`
 		SleepBetweenRequest time.Duration `yaml:"sleep-between-request"`
+		Proxy               []string      `yaml:"proxy"`
 		UserAgents          []string      `yaml:"user-agents"`
 	}
 }
@@ -38,18 +37,18 @@ func NewConfigFromString(data string) Config {
 	newConf := Config{}
 
 	err := yaml.Unmarshal([]byte(data), &newConf)
-	checkError(err, "Loading config from a string")
+	util.CheckError(err, "Loading config from a string")
 	return newConf
 }
 
 // Create a Config from yaml file
 func NewConfigFromFile(configFilePath string) Config {
 	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		checkError(err, "Checking existence of a config file")
+		util.CheckError(err, "Checking existence of a config file")
 	}
 
 	configFileContent, err := ioutil.ReadFile(configFilePath)
-	checkError(err, "Loading config file content")
+	util.CheckError(err, "Loading config file content")
 
 	return NewConfigFromString(string(configFileContent))
 }
@@ -62,30 +61,27 @@ func ConfigFileExists(configFilePath string) bool {
 	return true
 }
 
-// Apply a Config to Colly
-func ApplyConfigToColly(config Config, c *colly.Collector) {
-	c.AllowedDomains = config.Crawler.AllowedDomains
-	c.AllowURLRevisit = config.Crawler.AllowURLRevisit
-	c.DetectCharset = config.Crawler.DetectCharset
-	c.DisallowedDomains = config.Crawler.DisallowedDomains
-	c.CheckHead = config.Crawler.CheckHead
-	c.Async = config.Crawler.Async
-	c.IgnoreRobotsTxt = config.Crawler.IgnoreRobotsTxt
+func GetDefaultConfig() string {
+	return `
+mongo:
+  address: "mongodb://localhost:27017"
+  database: "scrapping"
+crawler:
+  allow-url-revisit: false
+  #allowed-domains:
+  #  - www.google.com
+  async: true
+  detect-charset: false
+  #disallowed-domains:
+  #  - www.google.com
+  ignore-robots-txt: false
+  limit:
+    parallelism: "1"
+  max-url-visited: 3
+  random-users-agents: false
+  sleep-between-request: 0
+  user-agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.0129.115 Safari/537.36"
 
-	realLimitParallelism := 1
-	limitParallelism := string(config.Crawler.Limit.Parallelism)
-	if limitParallelism == "auto" {
-		realLimitParallelism = runtime.NumCPU()
-	} else {
-		x, _ := strconv.Atoi(string(config.Crawler.Limit.Parallelism))
-		realLimitParallelism = x
-	}
-
-	fmt.Println(realLimitParallelism)
-	err := c.Limit(&colly.LimitRule{
-		DomainGlob:  "*",
-		Parallelism: realLimitParallelism,
-		//RandomDelay: 15 * time.Second,
-	})
-	checkError(err, "Applying Config to a colly collector")
+`
 }

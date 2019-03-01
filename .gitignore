@@ -2,5 +2,5 @@
 *.bat
 *.sh
 *.exe
-tmp/
-_tmp/
+/tmp
+/_tmp

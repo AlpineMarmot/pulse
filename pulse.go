@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"github.com/gocolly/colly"
 	"os"
+	"pulse/config"
+	"pulse/util"
+	"runtime"
+	"strconv"
 	"time"
-)
-
-const (
-	DefaultConfigFile = "./pulse.yml"
 )
 
 type Pulse struct {
 	entryPoint          string
-	config              Config
+	config              config.Config
 	configFile          string
 	colly               *colly.Collector
 	requestMiddlewares  []colly.RequestCallback
@@ -54,15 +54,19 @@ func (p *Pulse) SetEntryPoint(entryPoint string) {
 }
 
 func (p *Pulse) LoadConfigFile(configFile string) {
-	if ConfigFileExists(configFile) == true {
-		fmt.Println("Loading configuration", configFile)
-		p.config = NewConfigFromFile(configFile)
-		p.maxUrlVisited = p.config.Crawler.MaxUrlVisited
-		ApplyConfigToColly(p.config, p.colly)
-	} else if ConfigFileExists(configFile) == true {
+	if len(configFile) == 0 {
+		fmt.Println("Loading default configuration ... ")
+		p.config = config.NewConfigFromString(config.GetDefaultConfig())
+	} else if config.ConfigFileExists(configFile) == true {
+		fmt.Println("Loading configuration file", configFile)
+		p.config = config.NewConfigFromFile(configFile)
+	} else if config.ConfigFileExists(configFile) == true {
 		fmt.Println(configFile)
 		fmt.Printf("Unable to load configuration file : %s", configFile)
+		return
 	}
+
+	p.applyConfigToColly()
 }
 
 func (p *Pulse) OnRequest(middleware colly.RequestCallback) {
@@ -97,7 +101,7 @@ func (p *Pulse) Start() {
 	p.colly.OnResponse(func(r *colly.Response) {
 		if p.maxUrlVisited > 0 && p.maxUrlVisited <= p.stats.urlVisited {
 			fmt.Printf("\nLimit of %d URLs visited reached!\n", p.maxUrlVisited)
-			p.PrintStats()
+			p.printStats()
 			os.Exit(0)
 		}
 		p.stats.urlVisited++
@@ -115,11 +119,11 @@ func (p *Pulse) Start() {
 			if err.Error() == colly.ErrAlreadyVisited.Error() ||
 				err.Error() == colly.ErrMissingURL.Error() ||
 				err.Error() == colly.ErrRobotsTxtBlocked.Error() {
-				p.StatsFromError(err)
+				p.statsFromError(err)
 				return
 			}
 		}
-		checkError(err, "Jumping on a link "+url)
+		util.CheckError(err, "Jumping on a link "+url)
 	})
 
 	for selector, middleware := range p.htmlMiddlewares {
@@ -127,13 +131,13 @@ func (p *Pulse) Start() {
 	}
 
 	err := p.colly.Visit(p.entryPoint)
-	checkError(err, "Starting pulse")
+	util.CheckError(err, "Starting pulse")
 	p.colly.Wait()
 
-	p.PrintStats()
+	p.printStats()
 }
 
-func (p *Pulse) StatsFromError(err error) {
+func (p *Pulse) statsFromError(err error) {
 	switch err.Error() {
 	case colly.ErrAlreadyVisited.Error():
 		p.stats.urlSkipped++
@@ -144,11 +148,50 @@ func (p *Pulse) StatsFromError(err error) {
 	}
 }
 
-func (p *Pulse) PrintStats() {
+func (p *Pulse) printStats() {
 	fmt.Println("URL visited:", p.stats.urlVisited)
 	fmt.Println("URL skipped:", p.stats.urlSkipped)
 	fmt.Println("URL missing or partial:", p.stats.urlMissing)
 	fmt.Println("URL blocked by robots.txt:", p.stats.urlBlockedByRobotsTxt)
 	now := time.Now()
 	fmt.Println(now.Sub(p.stats.startTime).Seconds(), "sec(s)")
+}
+
+func (p *Pulse) applyConfigToColly() {
+	p.maxUrlVisited = p.config.Crawler.MaxUrlVisited
+	p.colly.AllowedDomains = p.config.Crawler.AllowedDomains
+	p.colly.AllowURLRevisit = p.config.Crawler.AllowURLRevisit
+	p.colly.Async = p.config.Crawler.Async
+	p.colly.CheckHead = p.config.Crawler.CheckHead
+	p.colly.DetectCharset = p.config.Crawler.DetectCharset
+	p.colly.DisallowedDomains = p.config.Crawler.DisallowedDomains
+	p.colly.IgnoreRobotsTxt = p.config.Crawler.IgnoreRobotsTxt
+
+	realLimitParallelism := 1
+	limitParallelism := p.config.Crawler.Limit.Parallelism
+	if limitParallelism == "auto" {
+		realLimitParallelism = runtime.NumCPU()
+	} else {
+		x := p.config.Crawler.Limit.Parallelism.(string)
+		realLimitParallelism, _ = strconv.Atoi(x) // Alt. non panicking version
+	}
+
+	fmt.Println(realLimitParallelism)
+	err := p.colly.Limit(&colly.LimitRule{
+		DomainGlob:  "*",
+		Parallelism: realLimitParallelism,
+		//RandomDelay: 15 * time.Second,
+	})
+	util.CheckError(err, "Applying Limit config to colly")
+
+	p.colly.MaxDepth = p.config.Crawler.MaxDepth
+
+	// need work
+	//if len(p.config.Crawler.Proxy) > 0 {
+	//	rp, err := proxy.RoundRobinProxySwitcher("socks5://127.0.0.1:1337", "socks5://127.0.0.1:1338")
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//	p.colly.SetProxyFunc(rp)
+	//}
 }
