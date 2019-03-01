@@ -2,4 +2,5 @@
 *.bat
 *.sh
 *.exe
-tmp
+tmp/
+_tmp/
