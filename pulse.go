@@ -7,7 +7,6 @@ import (
 	"pulse/config"
 	"pulse/util"
 	"runtime"
-	"strconv"
 	"time"
 )
 
@@ -56,7 +55,7 @@ func (p *Pulse) SetEntryPoint(entryPoint string) {
 func (p *Pulse) LoadConfigFile(configFile string) {
 	if len(configFile) == 0 {
 		fmt.Println("Loading default configuration ... ")
-		p.config = config.NewConfigFromString(config.GetDefaultConfig())
+		p.config = config.NewConfigFromFile(util.GetCurrentPath() + "/default.yml")
 	} else if config.ConfigFileExists(configFile) == true {
 		fmt.Println("Loading configuration file", configFile)
 		p.config = config.NewConfigFromFile(configFile)
@@ -65,7 +64,6 @@ func (p *Pulse) LoadConfigFile(configFile string) {
 		fmt.Printf("Unable to load configuration file : %s", configFile)
 		return
 	}
-
 	p.applyConfigToColly()
 }
 
@@ -167,23 +165,21 @@ func (p *Pulse) applyConfigToColly() {
 	p.colly.DisallowedDomains = p.config.Crawler.DisallowedDomains
 	p.colly.IgnoreRobotsTxt = p.config.Crawler.IgnoreRobotsTxt
 
-	realLimitParallelism := 1
 	limitParallelism := p.config.Crawler.Limit.Parallelism
-	if limitParallelism == "auto" {
-		realLimitParallelism = runtime.NumCPU()
-	} else {
-		x := p.config.Crawler.Limit.Parallelism.(string)
-		realLimitParallelism, _ = strconv.Atoi(x) // Alt. non panicking version
+	if limitParallelism == 0 {
+		limitParallelism = runtime.NumCPU()
 	}
 
-	fmt.Println(realLimitParallelism)
 	err := p.colly.Limit(&colly.LimitRule{
-		DomainGlob:  "*",
-		Parallelism: realLimitParallelism,
-		//RandomDelay: 15 * time.Second,
+		DomainGlob:   p.config.Crawler.Limit.DomainGlob,
+		DomainRegexp: p.config.Crawler.Limit.DomainRegexp,
+		Delay:        p.config.Crawler.Limit.Delay,
+		RandomDelay:  p.config.Crawler.Limit.RandomDelay,
+		Parallelism:  limitParallelism,
 	})
 	util.CheckError(err, "Applying Limit config to colly")
 
+	p.colly.MaxBodySize = p.config.Crawler.MaxBodySize
 	p.colly.MaxDepth = p.config.Crawler.MaxDepth
 
 	// need work
