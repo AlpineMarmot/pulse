@@ -1,0 +1,25 @@
+mongo:
+  address: "mongodb://localhost:27017"
+  database: "scrapping"
+crawler:
+  allow-url-revisit: false
+  allowed-domains:
+  #  - www.google.com
+  async: true
+  detect-charset: false
+  disallowed-domains:
+  #  - www.google.com
+  ignore-robots-txt: false
+  limit:
+    domain-regexp: ""
+    domain-glob: "*"
+    delay: 0
+    random-delay: 0
+    parallelism: 0 # 0 = will take the max os cpu number
+  max-body-size: 10485760 # 10MB (10 * 1024 * 1024 bytes)
+  max-depth: 0
+  max-url-visited: 0
+  random-users-agents: false
+  sleep-between-request: 0
+  user-agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.0129.115 Safari/537.36"
