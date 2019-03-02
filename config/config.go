@@ -22,8 +22,13 @@ type Config struct {
 		DisallowedDomains []string `yaml:"disallowed-domains"`
 		IgnoreRobotsTxt   bool     `yaml:"ignore-robots-txt"`
 		Limit             struct {
-			Parallelism interface{} `yaml:"parallelism"`
+			DomainRegexp string        `yaml:"domain-regexp"`
+			DomainGlob   string        `yaml:"domain-glob"`
+			Delay        time.Duration `yaml:"delay"`
+			RandomDelay  time.Duration `yaml:"random-delay"`
+			Parallelism  int           `yaml:"parallelism"`
 		}
+		MaxBodySize         int           `yaml:"max-body-size"`
 		MaxDepth            int           `yaml:"max-depth"`
 		MaxUrlVisited       int64         `yaml:"max-url-visited"`
 		SleepBetweenRequest time.Duration `yaml:"sleep-between-request"`
@@ -59,29 +64,4 @@ func ConfigFileExists(configFilePath string) bool {
 		return false
 	}
 	return true
-}
-
-func GetDefaultConfig() string {
-	return `
-mongo:
-  address: "mongodb://localhost:27017"
-  database: "scrapping"
-crawler:
-  allow-url-revisit: false
-  #allowed-domains:
-  #  - www.google.com
-  async: true
-  detect-charset: false
-  #disallowed-domains:
-  #  - www.google.com
-  ignore-robots-txt: false
-  limit:
-    parallelism: "1"
-  max-url-visited: 3
-  random-users-agents: false
-  sleep-between-request: 0
-  user-agents:
-    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.0129.115 Safari/537.36"
-
-`
 }
