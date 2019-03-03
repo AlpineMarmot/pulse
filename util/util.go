@@ -17,3 +17,11 @@ func GetCurrentPath() string {
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	return dir
 }
+
+// check config file existence
+func FileExists(configFilePath string) bool {
+	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
