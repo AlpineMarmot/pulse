@@ -32,8 +32,20 @@ type Config struct {
 		MaxDepth            int           `yaml:"max-depth"`
 		MaxUrlVisited       int64         `yaml:"max-url-visited"`
 		SleepBetweenRequest time.Duration `yaml:"sleep-between-request"`
-		Proxy               []string      `yaml:"proxy"`
-		UserAgents          []string      `yaml:"user-agents"`
+		Storage             struct {
+			Redis struct {
+				Address  string
+				Password string
+				Db       int
+				Prefix   string
+			}
+			MongoDb struct {
+				Database string
+				Uri      string
+			}
+		}
+		Proxy      []string `yaml:"proxy"`
+		UserAgents []string `yaml:"user-agents"`
 	}
 }
 
@@ -56,12 +68,4 @@ func NewConfigFromFile(configFilePath string) Config {
 	util.CheckError(err, "Loading config file content")
 
 	return NewConfigFromString(string(configFileContent))
-}
-
-// check config file existence
-func ConfigFileExists(configFilePath string) bool {
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		return false
-	}
-	return true
 }

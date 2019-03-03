@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gocolly/colly"
+	"github.com/gocolly/redisstorage"
 	"os"
 	"pulse/config"
 	"pulse/util"
@@ -56,10 +57,10 @@ func (p *Pulse) LoadConfigFile(configFile string) {
 	if len(configFile) == 0 {
 		fmt.Println("Loading default configuration ... ")
 		p.config = config.NewConfigFromFile(util.GetCurrentPath() + "/default.yml")
-	} else if config.ConfigFileExists(configFile) == true {
+	} else if util.FileExists(configFile) == true {
 		fmt.Println("Loading configuration file", configFile)
 		p.config = config.NewConfigFromFile(configFile)
-	} else if config.ConfigFileExists(configFile) == true {
+	} else if util.FileExists(configFile) == true {
 		fmt.Println(configFile)
 		fmt.Printf("Unable to load configuration file : %s", configFile)
 		return
@@ -182,12 +183,18 @@ func (p *Pulse) applyConfigToColly() {
 	p.colly.MaxBodySize = p.config.Crawler.MaxBodySize
 	p.colly.MaxDepth = p.config.Crawler.MaxDepth
 
-	// need work
-	//if len(p.config.Crawler.Proxy) > 0 {
-	//	rp, err := proxy.RoundRobinProxySwitcher("socks5://127.0.0.1:1337", "socks5://127.0.0.1:1338")
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	p.colly.SetProxyFunc(rp)
-	//}
+	p.setStorage()
+}
+
+func (p *Pulse) setStorage() {
+	if len(p.config.Crawler.Storage.Redis.Address) > 0 {
+		storage := &redisstorage.Storage{
+			Address:  p.config.Crawler.Storage.Redis.Address,
+			Password: p.config.Crawler.Storage.Redis.Password,
+			DB:       p.config.Crawler.Storage.Redis.Db,
+			Prefix:   p.config.Crawler.Storage.Redis.Prefix,
+		}
+		err := p.colly.SetStorage(storage)
+		util.CheckError(err, "Setting redis as internal storage")
+	}
 }

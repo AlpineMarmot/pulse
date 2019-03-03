@@ -7,9 +7,11 @@ require (
 	github.com/antchfx/htmlquery v1.0.0 // indirect
 	github.com/antchfx/xmlquery v1.0.0 // indirect
 	github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e // indirect
+	github.com/go-redis/redis v6.15.2+incompatible // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0
+	github.com/gocolly/redisstorage v0.0.0-20180819125329-cc8d514304a2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/mongodb/mongo-go-driver v0.3.0
