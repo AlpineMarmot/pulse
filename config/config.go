@@ -33,7 +33,8 @@ type Config struct {
 		MaxUrlVisited       int64         `yaml:"max-url-visited"`
 		SleepBetweenRequest time.Duration `yaml:"sleep-between-request"`
 		Storage             struct {
-			Redis struct {
+			ClearOnStart bool `yaml:"clear-on-start"`
+			Redis        struct {
 				Address  string
 				Password string
 				Db       int

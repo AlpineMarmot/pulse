@@ -12,10 +12,13 @@ import (
 )
 
 type Pulse struct {
-	entryPoint          string
-	config              config.Config
-	configFile          string
-	colly               *colly.Collector
+	entryPoint   string
+	config       config.Config
+	configFile   string
+	colly        *colly.Collector
+	collyStorage struct {
+		redisStorage redisstorage.Storage
+	}
 	requestMiddlewares  []colly.RequestCallback
 	responseMiddlewares []colly.ResponseCallback
 	htmlMiddlewares     map[string]colly.HTMLCallback
@@ -188,13 +191,22 @@ func (p *Pulse) applyConfigToColly() {
 
 func (p *Pulse) setStorage() {
 	if len(p.config.Crawler.Storage.Redis.Address) > 0 {
-		storage := &redisstorage.Storage{
+		p.collyStorage.redisStorage = redisstorage.Storage{
 			Address:  p.config.Crawler.Storage.Redis.Address,
 			Password: p.config.Crawler.Storage.Redis.Password,
 			DB:       p.config.Crawler.Storage.Redis.Db,
 			Prefix:   p.config.Crawler.Storage.Redis.Prefix,
 		}
-		err := p.colly.SetStorage(storage)
+		err := p.colly.SetStorage(&p.collyStorage.redisStorage)
 		util.CheckError(err, "Setting redis as internal storage")
+
+		if p.config.Crawler.Storage.ClearOnStart == true {
+			err := p.collyStorage.redisStorage.Clear()
+			util.CheckError(err, "Clearing redis storage")
+		}
 	}
+}
+
+func (p *Pulse) CloseStorage() {
+	_ = p.collyStorage.redisStorage.Client.Close()
 }
