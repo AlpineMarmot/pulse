@@ -4,3 +4,4 @@
 *.exe
 /tmp
 /_tmp
+/docker/redis/*.*
