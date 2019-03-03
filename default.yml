@@ -31,13 +31,13 @@ crawler:
   # colly use in-memory. If you want to use multiple instance of pulse,
   # you may want use the same storage instance
   # see http://go-colly.org/docs/best_practices/storage/ for more infos
-  storage:
-    clear-on-start: true
-    redis:
-      address:  "127.0.0.1:6379"
-      password: ""
-      db:       0
-      prefix:   ""
+  #storage:
+  #  clear-on-start: true
+  #  redis:
+  #    address:  "127.0.0.1:6379"
+  #    password: ""
+  #    db:       0
+  #    prefix:   ""
   #  mongodb:
   #    Database: "pulse"
   #    Uri: "mongodb://127.0.0.1:27017"
