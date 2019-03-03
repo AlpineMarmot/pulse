@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gocolly/colly/extensions"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"pulse/database"
 	"pulse/util"
@@ -18,8 +17,6 @@ func main() {
 	pulse := NewPulse()
 	pulse.SetEntryPoint(url)
 	pulse.LoadConfigFile(*configFile)
-
-	extensions.RandomUserAgent(pulse.colly)
 
 	db := database.NewMongoDb(pulse.config.Mongo.Address, pulse.config.Mongo.Database)
 	err := db.Connect()

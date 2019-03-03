@@ -31,6 +31,7 @@ type Config struct {
 		MaxBodySize         int           `yaml:"max-body-size"`
 		MaxDepth            int           `yaml:"max-depth"`
 		MaxUrlVisited       int64         `yaml:"max-url-visited"`
+		RandomUserAgents    bool          `yaml:"random-user-agents"`
 		SleepBetweenRequest time.Duration `yaml:"sleep-between-request"`
 		Storage             struct {
 			ClearOnStart bool `yaml:"clear-on-start"`

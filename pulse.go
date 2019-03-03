@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/redisstorage"
 	"os"
 	"pulse/config"
@@ -187,6 +188,10 @@ func (p *Pulse) applyConfigToColly() {
 	p.colly.MaxDepth = p.config.Crawler.MaxDepth
 
 	p.setStorage()
+
+	if p.config.Crawler.RandomUserAgents == true {
+		extensions.RandomUserAgent(p.colly)
+	}
 }
 
 func (p *Pulse) setStorage() {

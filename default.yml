@@ -2,6 +2,8 @@ mongo:
   address: "mongodb://localhost:27017"
   database: "scrapping"
 
+# many option below are from colly,
+# see https://godoc.org/github.com/gocolly/colly#Collector for more infos
 crawler:
   allow-url-revisit: false
   allowed-domains:
@@ -22,12 +24,15 @@ crawler:
   max-body-size: 10485760 # 10MB (10 * 1024 * 1024 bytes)
   max-depth: 0
   max-url-visited: 100
-  random-users-agents: false
+  random-user-agents: true
   sleep-between-request: 0
 
+  # This option is for the internal storage of colly. By default,
+  # colly use in-memory. If you want to use multiple instance of pulse,
+  # you may want use the same storage instance
   # see http://go-colly.org/docs/best_practices/storage/ for more infos
   storage:
-    clear-on-start: false
+    clear-on-start: true
     redis:
       address:  "127.0.0.1:6379"
       password: ""
