@@ -213,5 +213,7 @@ func (p *Pulse) setStorage() {
 }
 
 func (p *Pulse) CloseStorage() {
-	_ = p.collyStorage.redisStorage.Client.Close()
+	if len(p.config.Crawler.Storage.Redis.Address) > 0 {
+		_ = p.collyStorage.redisStorage.Client.Close()
+	}
 }

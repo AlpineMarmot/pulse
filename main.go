@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"pulse/database"
+	"pulse/middleware"
 	"pulse/util"
 	"time"
 )
+
+var db database.MongoDb
+var currentSessionId interface{}
 
 func main() {
 	configFile := flag.String("c", "", "Configuration file")
@@ -18,28 +22,24 @@ func main() {
 	pulse.SetEntryPoint(url)
 	pulse.LoadConfigFile(*configFile)
 
-	db := database.NewMongoDb(pulse.config.Mongo.Address, pulse.config.Mongo.Database)
+	db = database.NewMongoDb(pulse.config.Mongo.Address, pulse.config.Mongo.Database)
 	err := db.Connect()
 	util.CheckError(err, "Connecting to mongo database")
 
-	responseCollection := db.Collection("sessions")
-	res, _ := responseCollection.InsertOne(db.GetQueryContext(), bson.M{
-		"dt_created": time.Now(),
-	})
-	sessionId := res.InsertedID
-	fmt.Println(sessionId)
+	currentSessionId = CreateSessionId()
+	fmt.Println(currentSessionId)
 
-	//countRequest := 0
-	//pulse.OnRequest(func(request *colly.Request) {
-	//	countRequest++
-	//	fmt.Println("Request #", countRequest)
-	//})
-
-	//pulse.OnHTML("img[data-src]", func(e *colly.HTMLElement) {
-	//	src := e.Attr("data-src")
-	//	fmt.Println(src)
-	//})
+	pulse.OnRequest(middleware.StoreRequest(db, currentSessionId))
+	pulse.OnResponse(middleware.StoreResponse(db, currentSessionId))
 
 	defer pulse.CloseStorage()
 	pulse.Start()
+}
+
+func CreateSessionId() interface{} {
+	coll := db.Collection("sessions")
+	res, _ := coll.InsertOne(db.GetQueryContext(), bson.M{
+		"dt_created": time.Now(),
+	})
+	return res.InsertedID
 }
