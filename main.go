@@ -31,6 +31,7 @@ func main() {
 
 	pulse.OnRequest(middleware.StoreRequest(db, currentSessionId))
 	pulse.OnResponse(middleware.StoreResponse(db, currentSessionId))
+	pulse.OnHTML(middleware.GrabImageUrlSelector(), middleware.GrabImageUrl(db, currentSessionId))
 
 	defer pulse.CloseStorage()
 	pulse.Start()
