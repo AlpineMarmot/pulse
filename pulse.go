@@ -5,8 +5,10 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/redisstorage"
+	"go.mongodb.org/mongo-driver/bson"
 	"os"
 	"pulse/config"
+	"pulse/database"
 	"pulse/util"
 	"runtime"
 	"time"
@@ -70,6 +72,14 @@ func (p *Pulse) LoadConfigFile(configFile string) {
 		return
 	}
 	p.applyConfigToColly()
+}
+
+func (p *Pulse) CreateSessionId(db database.MongoDb) interface{} {
+	coll := db.Collection("sessions")
+	res, _ := coll.InsertOne(db.GetQueryContext(), bson.M{
+		"dt_created": time.Now(),
+	})
+	return res.InsertedID
 }
 
 func (p *Pulse) OnRequest(middleware colly.RequestCallback) {
