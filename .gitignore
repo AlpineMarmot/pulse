@@ -5,3 +5,4 @@
 /tmp
 /_tmp
 /docker/redis/*.*
+/docker/mongodb/*.*
