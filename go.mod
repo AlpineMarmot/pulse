@@ -1,4 +1,4 @@
-module pulse
+module github.com/AlpineMarmot/pulse
 
 go 1.12
 

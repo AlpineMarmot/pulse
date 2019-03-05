@@ -1,14 +1,15 @@
 package config
 
 import (
+	"github.com/AlpineMarmot/pulse/middleware"
+	"github.com/AlpineMarmot/pulse/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"pulse/middleware"
-	"pulse/util"
 	"time"
 )
 
+// pulse configuration structure
 type Config struct {
 	Pulse   configPulse   `yaml:"pulse"`
 	Crawler configCrawler `yaml:"crawler"`

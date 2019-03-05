@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"github.com/AlpineMarmot/pulse/database"
 	"github.com/gocolly/colly"
 	"go.mongodb.org/mongo-driver/bson"
-	"pulse/database"
 	"time"
 )
 

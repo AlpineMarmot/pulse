@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/AlpineMarmot/pulse/config"
+	"github.com/AlpineMarmot/pulse/database"
+	"github.com/AlpineMarmot/pulse/util"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/redisstorage"
 	"go.mongodb.org/mongo-driver/bson"
 	"os"
-	"pulse/config"
-	"pulse/database"
-	"pulse/util"
 	"runtime"
 	"time"
 )

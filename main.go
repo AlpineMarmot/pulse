@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"pulse/database"
-	"pulse/middleware"
-	"pulse/util"
+	"github.com/AlpineMarmot/pulse/database"
+	"github.com/AlpineMarmot/pulse/middleware"
+	"github.com/AlpineMarmot/pulse/util"
 )
 
 var db database.MongoDb
