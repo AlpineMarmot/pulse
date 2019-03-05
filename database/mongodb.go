@@ -7,16 +7,16 @@ import (
 )
 
 type MongoDb struct {
-	address      string
+	uri          string
 	database     string
 	conn         *mongo.Client
 	connTimeout  time.Duration
 	queryTimeout time.Duration
 }
 
-func NewMongoDb(address string, database string) MongoDb {
+func NewMongoDb(uri string, database string) MongoDb {
 	return MongoDb{
-		address:      address,
+		uri:          uri,
 		database:     database,
 		connTimeout:  10,
 		queryTimeout: 5,
@@ -26,7 +26,7 @@ func NewMongoDb(address string, database string) MongoDb {
 func (m *MongoDb) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), m.connTimeout*time.Second)
 	err := error(nil)
-	m.conn, err = mongo.Connect(ctx, m.address)
+	m.conn, err = mongo.Connect(ctx, m.uri)
 	return err
 }
 
