@@ -26,7 +26,7 @@ func main() {
 	util.CheckError(err, "Connecting to mongo database")
 
 	// create a session id
-	currentSessionId = pulse.CreateSessionId(db)
+	currentSessionId = pulse.CreateSessionID(db)
 	fmt.Println(currentSessionId)
 
 	// register middlewares

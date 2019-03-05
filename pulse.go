@@ -74,7 +74,7 @@ func (p *Pulse) LoadConfigFile(configFile string) {
 	p.applyConfigToColly()
 }
 
-func (p *Pulse) CreateSessionId(db database.MongoDb) interface{} {
+func (p *Pulse) CreateSessionID(db database.MongoDb) interface{} {
 	coll := db.Collection("sessions")
 	res, _ := coll.InsertOne(db.GetQueryContext(), bson.M{
 		"dt_created": time.Now(),
