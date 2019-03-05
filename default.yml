@@ -12,6 +12,11 @@ pulse:
       attr: "src"
       context-attr: "alt"
 
+    - collection: "images-test"
+      selector: "img[data-src]"
+      attr: "data-src"
+      context-attr: "alt"
+
 # crawling configuration and behavior, many options below are from colly,
 # see https://godoc.org/github.com/gocolly/colly#Collector for more infos
 crawler:
