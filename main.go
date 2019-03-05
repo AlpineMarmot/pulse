@@ -3,11 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mongodb/mongo-go-driver/bson"
 	"pulse/database"
 	"pulse/middleware"
 	"pulse/util"
-	"time"
 )
 
 var db database.MongoDb
@@ -22,25 +20,33 @@ func main() {
 	pulse.SetEntryPoint(url)
 	pulse.LoadConfigFile(*configFile)
 
-	db = database.NewMongoDb(pulse.config.Mongo.Address, pulse.config.Mongo.Database)
+	// connect to database
+	db = database.NewMongoDb(pulse.config.Pulse.Mongo.Uri, pulse.config.Pulse.Mongo.Database)
 	err := db.Connect()
 	util.CheckError(err, "Connecting to mongo database")
 
-	currentSessionId = CreateSessionId()
+	// create a session id
+	currentSessionId = pulse.CreateSessionId(db)
 	fmt.Println(currentSessionId)
 
+	// register middlewares
 	pulse.OnRequest(middleware.StoreRequest(db, currentSessionId))
 	pulse.OnResponse(middleware.StoreResponse(db, currentSessionId))
-	pulse.OnHTML(middleware.GrabImageUrlSelector(), middleware.GrabImageUrl(db, currentSessionId))
 
+	for _, html := range pulse.config.Pulse.Html {
+		htmlAttr := middleware.HtmlAttributeDefinition{
+			Collection:  html.Collection,
+			Selector:    html.Selector,
+			Tag:         html.Tag,
+			Attr:        html.Attr,
+			ContextAttr: html.ContextAttr,
+		}
+		pulse.OnHTML(middleware.GetHtmlAttributeString(htmlAttr), middleware.HtmlAttribute(db, htmlAttr))
+	}
+
+	// defer colly internal storage if applicable
 	defer pulse.CloseStorage()
-	pulse.Start()
-}
 
-func CreateSessionId() interface{} {
-	coll := db.Collection("sessions")
-	res, _ := coll.InsertOne(db.GetQueryContext(), bson.M{
-		"dt_created": time.Now(),
-	})
-	return res.InsertedID
+	// crawl!
+	pulse.Start()
 }
