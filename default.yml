@@ -1,8 +1,18 @@
-mongo:
-  address: "mongodb://localhost:27017"
-  database: "scrapping"
+# pulse data-mining configuration
+pulse:
+  mongo:
+    database: scrapping
+    uri: "mongodb://localhost:27017"
+  middlewares: # wip
+    - StoreRequest
+    - StoreResponse
+  html:
+    - collection: "images"
+      tag: "img"
+      attr: "src"
+      context-attr: "alt"
 
-# many option below are from colly,
+# crawling configuration and behavior, many options below are from colly,
 # see https://godoc.org/github.com/gocolly/colly#Collector for more infos
 crawler:
   allow-url-revisit: false
@@ -23,7 +33,7 @@ crawler:
 
   max-body-size: 10485760 # 10MB (10 * 1024 * 1024 bytes)
   max-depth: 0
-  max-url-visited: 100
+  max-url-visited: 50
   random-user-agents: true
   sleep-between-request: 0
 
@@ -32,15 +42,15 @@ crawler:
   # you may want use the same storage instance
   # see http://go-colly.org/docs/best_practices/storage/ for more infos
   #storage:
-  #  clear-on-start: true
-  #  redis:
-  #    address:  "127.0.0.1:6379"
-  #    password: ""
-  #    db:       0
-  #    prefix:   ""
-  #  mongodb:
-  #    Database: "pulse"
-  #    Uri: "mongodb://127.0.0.1:27017"
+    #clear-on-start: true
+    #redis:
+      #address:  "127.0.0.1:6379"
+      #password: ""
+      #db:       0
+      #prefix:   ""
+  #  mongodb: # not supported yet
+  #    database: "pulse"
+  #    uri: "mongodb://127.0.0.1:27017"
 
   user-agents:
     - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.0129.115 Safari/537.36"
