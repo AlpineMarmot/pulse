@@ -14,6 +14,7 @@ Go modules must be enabled
  
 ### Usage
 
+`$ pulse [-q][--no-logging] [-c configFile] [url entrypoint]`
  > $ pulse -c conf.yml https://www.example.com
  
  ### Configuration example
