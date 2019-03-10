@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/AlpineMarmot/pulse/config"
 	"github.com/AlpineMarmot/pulse/database"
+	"github.com/AlpineMarmot/pulse/logger"
 	"github.com/AlpineMarmot/pulse/util"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
@@ -61,14 +61,14 @@ func (p *Pulse) SetEntryPoint(entryPoint string) {
 
 func (p *Pulse) LoadConfigFile(configFile string) {
 	if len(configFile) == 0 {
-		fmt.Println("Loading default configuration ... ")
+		logger.Println("Loading default configuration ... ")
 		p.config = config.NewConfigFromFile(util.GetCurrentPath() + "/default.yml")
 	} else if util.FileExists(configFile) == true {
-		fmt.Println("Loading configuration file", configFile)
+		logger.Println("Loading configuration file", configFile)
 		p.config = config.NewConfigFromFile(configFile)
 	} else if util.FileExists(configFile) == true {
-		fmt.Println(configFile)
-		fmt.Printf("Unable to load configuration file : %s", configFile)
+		logger.Println(configFile)
+		logger.Printf("Unable to load configuration file : %s", configFile)
 		return
 	}
 	p.applyConfigToColly()
@@ -96,11 +96,11 @@ func (p *Pulse) OnHTML(goquerySelector string, middleware colly.HTMLCallback) {
 
 func (p *Pulse) Start() {
 	if len(p.entryPoint) < 1 {
-		fmt.Println("Please, specify an url as entry point ...")
+		logger.Println("Please, specify an url as entry point ...")
 		return
 	}
 
-	fmt.Println("Starting ...")
+	logger.Println("Starting ...")
 
 	p.colly.OnRequest(func(r *colly.Request) {
 		r.Ctx.Put("url", r.URL.String())
@@ -113,12 +113,12 @@ func (p *Pulse) Start() {
 
 	p.colly.OnResponse(func(r *colly.Response) {
 		if p.maxUrlVisited > 0 && p.maxUrlVisited <= p.stats.urlVisited {
-			fmt.Printf("\nLimit of %d URLs visited reached!\n", p.maxUrlVisited)
+			logger.Printf("\nLimit of %d URLs visited reached!\n", p.maxUrlVisited)
 			p.printStats()
 			os.Exit(0)
 		}
 		p.stats.urlVisited++
-		fmt.Println("\nVisited", p.stats.urlVisited, r.Ctx.Get("url"))
+		logger.Println("Visited link #", p.stats.urlVisited, r.Ctx.Get("url"))
 	})
 
 	for _, middleware := range p.responseMiddlewares {
@@ -162,12 +162,12 @@ func (p *Pulse) statsFromError(err error) {
 }
 
 func (p *Pulse) printStats() {
-	fmt.Println("URL visited:", p.stats.urlVisited)
-	fmt.Println("URL skipped:", p.stats.urlSkipped)
-	fmt.Println("URL missing or partial:", p.stats.urlMissing)
-	fmt.Println("URL blocked by robots.txt:", p.stats.urlBlockedByRobotsTxt)
+	logger.Println("URL visited:", p.stats.urlVisited)
+	logger.Println("URL skipped:", p.stats.urlSkipped)
+	logger.Println("URL missing or partial:", p.stats.urlMissing)
+	logger.Println("URL blocked by robots.txt:", p.stats.urlBlockedByRobotsTxt)
 	now := time.Now()
-	fmt.Println(now.Sub(p.stats.startTime).Seconds(), "sec(s)")
+	logger.Println(now.Sub(p.stats.startTime).Seconds(), "sec(s)")
 }
 
 func (p *Pulse) applyConfigToColly() {

@@ -2,21 +2,22 @@ package util
 
 import (
 	"fmt"
+	"github.com/AlpineMarmot/pulse/logger"
 	"os"
 	"path/filepath"
 )
 
 func CheckError(err error, context string) {
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Context: %s.", context))
-		fmt.Println(err)
+		logger.Println(fmt.Sprintf("Context: %s.", context))
+		logger.Println(err)
 	}
 }
 
 func FatalError(msg string, err error) {
 	if err != nil {
-		fmt.Println(msg, ":")
-		fmt.Println("\t", err.Error())
+		logger.Print(msg, ": ")
+		logger.Println(err.Error())
 		os.Exit(1)
 	}
 }
