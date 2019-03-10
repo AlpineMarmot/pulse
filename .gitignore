@@ -2,6 +2,7 @@
 *.bat
 *.sh
 *.exe
+pulse.log
 /tmp
 /_tmp
 /docker/redis/*.*
