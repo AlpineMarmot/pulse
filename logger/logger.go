@@ -12,17 +12,19 @@ type logger struct {
 	fileHandler *os.File
 	file        interface{}
 	created     bool
+	quiet       bool
 }
 
 var loggerInstance logger
 
-func New(file interface{}) {
+func New(file interface{}, quiet bool) {
 	if loggerInstance.created == true {
 		return
 	}
 	loggerInstance = logger{
 		file:    file,
 		created: true,
+		quiet:   quiet,
 	}
 
 	if file != nil {
@@ -52,13 +54,19 @@ func CloseLogFile() {
 }
 
 func Println(v ...interface{}) {
-	loggerInstance.logger.Println(v)
+	if loggerInstance.quiet == false {
+		loggerInstance.logger.Println(v)
+	}
 }
 
 func Print(v ...interface{}) {
-	loggerInstance.logger.Print(v)
+	if loggerInstance.quiet == false {
+		loggerInstance.logger.Print(v)
+	}
 }
 
 func Printf(format string, v ...interface{}) {
-	loggerInstance.logger.Printf(format, v)
+	if loggerInstance.quiet == false {
+		loggerInstance.logger.Printf(format, v)
+	}
 }

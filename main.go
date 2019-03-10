@@ -15,13 +15,14 @@ func main() {
 
 	configFile := *flag.String("c", "", "Configuration file")
 	noLog := flag.Bool("no-logging", false, "Turn off file logging")
+	quietMode := flag.Bool("q", false, "Quiet mode (affect also file logging")
 	flag.Parse()
 	url := flag.Arg(0)
 
 	if false == *noLog {
-		logger.New("pulse.log")
+		logger.New("pulse.log", *quietMode)
 	} else {
-		logger.New(nil)
+		logger.New(nil, *quietMode)
 	}
 
 	pulse := NewPulse()
