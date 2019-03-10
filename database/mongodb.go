@@ -27,6 +27,7 @@ func (m *MongoDb) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), m.connTimeout*time.Second)
 	err := error(nil)
 	m.conn, err = mongo.Connect(ctx, m.uri)
+	err = m.conn.Ping(ctx, nil)
 	return err
 }
 
