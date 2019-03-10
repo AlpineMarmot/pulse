@@ -13,7 +13,7 @@ var currentSessionId interface{}
 
 func main() {
 
-	configFile := *flag.String("c", "", "Configuration file")
+	configFile := flag.String("c", "", "Configuration file")
 	noLog := flag.Bool("no-logging", false, "Turn off file logging")
 	quietMode := flag.Bool("q", false, "Quiet mode (affect also file logging")
 	flag.Parse()
@@ -27,7 +27,7 @@ func main() {
 
 	pulse := NewPulse()
 	pulse.SetEntryPoint(url)
-	pulse.LoadConfigFile(configFile)
+	pulse.LoadConfigFile(*configFile)
 
 	// connect to database
 	logger.Println("Connecting to mongodb ... ")
